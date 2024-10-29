@@ -30,6 +30,7 @@ public class main {
             JSONArray followRequests = (JSONArray) j.get("relationships_follow_requests_sent");
 
             //Going through all requested people
+            System.out.println("\nPeople that you sent request:");
             for(Object requestObject : followRequests){
                 JSONObject request = (JSONObject) requestObject;
 
@@ -40,7 +41,8 @@ public class main {
                 for (Object dataObject : stringListData) {
                     JSONObject data = (JSONObject) dataObject;
                     String value = (String) data.get("value");
-                    System.out.println("Value: " + value);
+                    String link = (String) data.get("href");
+                    System.out.println("Name: " + value + "\nLink: " + link);
                 }
             }
 
