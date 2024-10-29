@@ -22,12 +22,10 @@ public class main {
 
 
             //Parsing the JSON file
-            Object obj = parser.parse(new FileReader(pending));
-            JSONObject j =  (JSONObject) obj;
-
+            JSONObject jsonPending =  (JSONObject) parser.parse(new FileReader(pending));
 
             //Access the array "relationships_follow_requests_sent"
-            JSONArray followRequests = (JSONArray) j.get("relationships_follow_requests_sent");
+            JSONArray followRequests = (JSONArray) jsonPending.get("relationships_follow_requests_sent");
 
             //Going through all requested people
             System.out.println("\nPeople that you sent request:");
