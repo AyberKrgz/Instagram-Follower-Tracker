@@ -6,9 +6,46 @@ import java.util.Iterator;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.*;
+import java.util.Scanner;
 
 public class main {
     public static void main(String[] args) {
+
+        Scanner scan = new Scanner(System.in);
+        String input = "";
+
+        while(true){
+            System.out.println("\nChoose an operation:");
+            System.out.println("1-Followers");
+            System.out.println("2-Following");
+            System.out.println("3-Pending follow requests");
+            System.out.println("q for QUIT");
+            input = scan.next();
+
+            if(input.equalsIgnoreCase("1")){
+                System.out.println("Selamun ALeyküm");
+            }
+            else if(input.equalsIgnoreCase("2")){
+                System.out.println("Selamun ALeyküm2");
+            }
+            else if(input.equalsIgnoreCase("3")){
+                getPending();
+            }
+            else if(input.equalsIgnoreCase("q")){
+                System.out.println("Quitting. BYE!");
+                break;
+            }
+
+
+
+        }
+
+
+
+
+    }
+
+    public static void getPending(){
 
         //Creating a JSON parser object
         JSONParser parser = new JSONParser();
@@ -16,10 +53,7 @@ public class main {
         try {
 
             //Reading files
-            File followers_json = new File("followers_1.json");
-            File following_json = new File("following.json");
             File pending = new File("pending_follow_requests.json");
-
 
             //Parsing the JSON file
             JSONObject jsonPending =  (JSONObject) parser.parse(new FileReader(pending));
@@ -42,8 +76,8 @@ public class main {
                     String link = (String) data.get("href");
                     System.out.println("Name: " + value + "\nLink: " + link);
                 }
+                
             }
-
 
 
         } catch (FileNotFoundException e) {
@@ -53,8 +87,6 @@ public class main {
         } catch (ParseException e) {
             e.printStackTrace();
         }
-
-
     }
 
 }
