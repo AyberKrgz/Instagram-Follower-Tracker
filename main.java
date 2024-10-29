@@ -14,10 +14,14 @@ public class main {
     public static void main(String[] args) {
 
         Scanner scan = new Scanner(System.in);
-        int input = 99;
+        int input = 99;                                 //To control the operations
 
+        //Initializing sets and arrays
         Set<String> followersSet = new HashSet<>();
         Set<String> followingSet = new HashSet<>();
+        JSONArray followersArray = null;
+        JSONArray followingArray = null;
+        JSONArray followRequestsArray = null;
 
         //Creating a JSON parser object
         JSONParser parser = new JSONParser();
@@ -34,14 +38,14 @@ public class main {
             JSONObject jsonPending =  (JSONObject) parser.parse(new FileReader(pending));
 
             //Parsing the JSON file and creating the array
-            JSONArray followersArray = (JSONArray) parser.parse(new FileReader(followersFile));
+            followersArray = (JSONArray) parser.parse(new FileReader(followersFile));
             //Access the array "relationships_following"
-            JSONArray followingArray = (JSONArray) jsonFollowing.get("relationships_following");
+            followingArray = (JSONArray) jsonFollowing.get("relationships_following");
             //Access the array "relationships_follow_requests_sent"
-            JSONArray followRequestsArray = (JSONArray) jsonPending.get("relationships_follow_requests_sent");
+            followRequestsArray = (JSONArray) jsonPending.get("relationships_follow_requests_sent");
 
 
-            // Followers setini doldur
+            //Filling the followers set
 
             for (Object followerObj : followersArray) {
                 JSONObject follower = (JSONObject) followerObj;
@@ -53,7 +57,7 @@ public class main {
                 }
             }
 
-            // Following setini doldur
+            //Filling the following set
 
             for (Object followingObj : followingArray) {
                 JSONObject following = (JSONObject) followingObj;
@@ -79,26 +83,32 @@ public class main {
             System.out.println("1-List of followers ");
             System.out.println("2-List of following ");
             System.out.println("3-Still haven't accepted my follow request ");
-            System.out.println("4-Followers who I don't follow back ");
-            System.out.println("5-Followings who don't follow me back ");
+            System.out.println("4-Followings who don't follow me back ");
+            System.out.println("5-Followers who I don't follow back ");
             System.out.println("0-QUIT");
             input = scan.nextInt();
             scan.nextLine();
 
             if(input == 1){                             //"1-List of followers "
-                getFollowers();
+                if (followersArray != null) {
+                    getFollowers(followersArray);
+                }
             }
             else if(input == 2){                        //"2-List of following "
-                getFollowing();
+                if (followingArray != null) {
+                    getFollowing(followingArray);
+                }
             }
             else if(input == 3){                        //"3-Still haven't accepted my follow request "
-                getPending();
+                if (followRequestsArray != null) {
+                    getPending(followRequestsArray);
+                }
             }
-            else if(input == 4){                        //"4-Followers who I don't follow back "
-                opt4(followersSet, followingSet);
+            else if(input == 4){                        //"4-Followings who don't follow me back "
+                opt4(followingSet, followersSet);
             }
-            else if(input == 5){                        //"5-Followings who don't follow me back "
-                opt5(followingSet, followersSet);
+            else if(input == 5){                        //"5-Followers who I don't follow back "
+                opt5(followersSet, followingSet);
             }
             else if(input == 0){                        //"0-QUIT"
                 System.out.println("Quitting. BYE!");
@@ -110,25 +120,73 @@ public class main {
 
     }
 
-    public static void opt4(Set<String> followersSet, Set<String> followingSet){
-        //Copying sets
-        Set<String> set1 = new HashSet<>();
-        Set<String> set2 = new HashSet<>();
-        set1.addAll(followersSet);
-        set2.addAll(followingSet);
+    public static void getFollowers(JSONArray followers){
 
-        //Extracting following from followers
-        set1.removeAll(set2);
+        //Going through all the people that we follow
+        System.out.println("\nYour followers: ");
+        for(Object followerObject : followers){
+            JSONObject follower = (JSONObject) followerObject;
 
-        //Printing the result
-        System.out.println("Followers who you don't follow back: ");
-        for (String user : set1) {
-            System.out.println(user);
+            //Access the "string_list_data" array within each request object
+            JSONArray stringListData = (JSONArray) follower.get("string_list_data");
+
+            //Retrieve the "value" and "href" fields from each element in "string_list_data"
+            for (Object dataObject : stringListData) {
+                JSONObject data = (JSONObject) dataObject;
+                String value = (String) data.get("value");
+                String link = (String) data.get("href");
+                System.out.println(value + "\t\t" + link);
+            }
+
         }
 
     }
 
-    public static void opt5(Set<String> followingSet, Set<String> followersSet){
+    public static void getFollowing(JSONArray following){
+
+        //Going through all the people that we follow
+        System.out.println("\nPeople that you follow:");
+        for(Object followingObject : following){
+            JSONObject followings = (JSONObject) followingObject;
+
+            //Access the "string_list_data" array within each request object
+            JSONArray stringListData = (JSONArray) followings.get("string_list_data");
+
+            //Retrieve the "value" and "href" fields from each element in "string_list_data"
+            for (Object dataObject : stringListData) {
+                JSONObject data = (JSONObject) dataObject;
+                String value = (String) data.get("value");
+                String link = (String) data.get("href");
+                System.out.println(value + "\t\t" + link);
+            }
+
+        }
+
+    }
+
+    public static void getPending(JSONArray followRequests){
+
+        //Going through all requested people
+        System.out.println("\nPeople that haven't accepted your request:");
+        for(Object requestObject : followRequests){
+            JSONObject request = (JSONObject) requestObject;
+
+            //Access the "string_list_data" array within each request object
+            JSONArray stringListData = (JSONArray) request.get("string_list_data");
+
+            //Retrieve the "value" and "href" fields from each element in "string_list_data"
+            for (Object dataObject : stringListData) {
+                JSONObject data = (JSONObject) dataObject;
+                String value = (String) data.get("value");
+                String link = (String) data.get("href");
+                System.out.println(value + "\t\t" + link);
+            }
+
+        }
+
+    }
+
+    public static void opt4(Set<String> followingSet, Set<String> followersSet){
 
         //Copying sets
         Set<String> set1 = new HashSet<>();
@@ -147,133 +205,24 @@ public class main {
 
     }
 
-    public static void getFollowers(){
+    public static void opt5(Set<String> followersSet, Set<String> followingSet){
+        //Copying sets
+        Set<String> set1 = new HashSet<>();
+        Set<String> set2 = new HashSet<>();
+        set1.addAll(followersSet);
+        set2.addAll(followingSet);
 
-        //Creating a JSON parser object
-        JSONParser parser = new JSONParser();
+        //Extracting following from followers
+        set1.removeAll(set2);
 
-        try {
-
-            //Reading the file
-            File followersFile = new File("followers_1.json");
-
-            //Parsing the JSON file and creating the array
-            JSONArray followers = (JSONArray) parser.parse(new FileReader(followersFile));
-
-            //Going through all the people that we follow
-            System.out.println("\nYour followers: ");
-            for(Object followerObject : followers){
-                JSONObject follower = (JSONObject) followerObject;
-
-                //Access the "string_list_data" array within each request object
-                JSONArray stringListData = (JSONArray) follower.get("string_list_data");
-
-                //Retrieve the "value" and "href" fields from each element in "string_list_data"
-                for (Object dataObject : stringListData) {
-                    JSONObject data = (JSONObject) dataObject;
-                    String value = (String) data.get("value");
-                    String link = (String) data.get("href");
-                    System.out.println(value + "\t\t" + link);
-                }
-
-            }
-
-
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ParseException e) {
-            e.printStackTrace();
+        //Printing the result
+        System.out.println("Followers who you don't follow back: ");
+        for (String user : set1) {
+            System.out.println(user);
         }
+
     }
 
-    public static void getFollowing(){
 
-        //Creating a JSON parser object
-        JSONParser parser = new JSONParser();
-
-        try {
-
-            //Reading the file
-            File followingFile = new File("following.json");
-
-            //Parsing the JSON file
-            JSONObject jsonFollowing =  (JSONObject) parser.parse(new FileReader(followingFile));
-
-            //Access the array "relationships_following"
-            JSONArray following = (JSONArray) jsonFollowing.get("relationships_following");
-
-            //Going through all the people that we follow
-            System.out.println("\nPeople that you follow:");
-            for(Object followingObject : following){
-                JSONObject followings = (JSONObject) followingObject;
-
-                //Access the "string_list_data" array within each request object
-                JSONArray stringListData = (JSONArray) followings.get("string_list_data");
-
-                //Retrieve the "value" and "href" fields from each element in "string_list_data"
-                for (Object dataObject : stringListData) {
-                    JSONObject data = (JSONObject) dataObject;
-                    String value = (String) data.get("value");
-                    String link = (String) data.get("href");
-                    System.out.println(value + "\t\t" + link);
-                }
-
-            }
-
-
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public static void getPending(){
-
-        //Creating a JSON parser object
-        JSONParser parser = new JSONParser();
-
-        try {
-
-            //Reading the file
-            File pending = new File("pending_follow_requests.json");
-
-            //Parsing the JSON file
-            JSONObject jsonPending =  (JSONObject) parser.parse(new FileReader(pending));
-
-            //Access the array "relationships_follow_requests_sent"
-            JSONArray followRequests = (JSONArray) jsonPending.get("relationships_follow_requests_sent");
-
-            //Going through all requested people
-            System.out.println("\nPeople that you sent request:");
-            for(Object requestObject : followRequests){
-                JSONObject request = (JSONObject) requestObject;
-
-                //Access the "string_list_data" array within each request object
-                JSONArray stringListData = (JSONArray) request.get("string_list_data");
-
-                //Retrieve the "value" and "href" fields from each element in "string_list_data"
-                for (Object dataObject : stringListData) {
-                    JSONObject data = (JSONObject) dataObject;
-                    String value = (String) data.get("value");
-                    String link = (String) data.get("href");
-                    System.out.println(value + "\t\t" + link);
-                }
-
-            }
-
-
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-    }
 
 }
