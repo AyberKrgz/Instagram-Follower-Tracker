@@ -19,6 +19,8 @@ public class main {
         //Initializing sets and arrays
         Set<String> followersSet = new HashSet<>();
         Set<String> followingSet = new HashSet<>();
+        Set<String> opt4 = new HashSet<>();
+        Set<String> opt5 = new HashSet<>();
         JSONArray followersArray = null;
         JSONArray followingArray = null;
         JSONArray followRequestsArray = null;
@@ -38,15 +40,13 @@ public class main {
             JSONObject jsonPending =  (JSONObject) parser.parse(new FileReader(pending));
 
             //Parsing the JSON file and creating the array
+            //Accessing the arrays "relationships_following" , "relationships_follow_requests_sent"
             followersArray = (JSONArray) parser.parse(new FileReader(followersFile));
-            //Access the array "relationships_following"
             followingArray = (JSONArray) jsonFollowing.get("relationships_following");
-            //Access the array "relationships_follow_requests_sent"
             followRequestsArray = (JSONArray) jsonPending.get("relationships_follow_requests_sent");
 
 
             //Filling the followers set
-
             for (Object followerObj : followersArray) {
                 JSONObject follower = (JSONObject) followerObj;
                 JSONArray stringListData = (JSONArray) follower.get("string_list_data");
@@ -58,7 +58,6 @@ public class main {
             }
 
             //Filling the following set
-
             for (Object followingObj : followingArray) {
                 JSONObject following = (JSONObject) followingObj;
                 JSONArray stringListData = (JSONArray) following.get("string_list_data");
@@ -68,6 +67,13 @@ public class main {
                     followingSet.add(value);
                 }
             }
+
+            //Copying and extracting operations for option 4 and 5.
+            opt4.addAll(followingSet);
+            opt4.removeAll(followersSet);
+            opt5.addAll(followersSet);
+            opt5.removeAll(followingSet);
+
 
         } catch (FileNotFoundException e) {
             e.printStackTrace();
@@ -79,12 +85,14 @@ public class main {
 
 
         while(true){
+
+            //MENU
             System.out.println("\nChoose an operation:");
-            System.out.println("1-List of followers ");
-            System.out.println("2-List of following ");
-            System.out.println("3-Still haven't accepted my follow request ");
-            System.out.println("4-Followings who don't follow me back ");
-            System.out.println("5-Followers who I don't follow back ");
+            System.out.println("1-List of followers (" + followersSet.stream().count() + ") ");
+            System.out.println("2-List of following (" + followingSet.stream().count() + ") ");
+            System.out.println("3-Still haven't accepted my follow request (" + followRequestsArray.stream().count() + ") ");
+            System.out.println("4-Followings who don't follow me back (" + opt4.stream().count() + ")");
+            System.out.println("5-Followers who I don't follow back (" + opt5.stream().count() + ")");
             System.out.println("0-QUIT");
             input = scan.nextInt();
             scan.nextLine();
@@ -105,10 +113,10 @@ public class main {
                 }
             }
             else if(input == 4){                        //"4-Followings who don't follow me back "
-                opt4(followingSet, followersSet);
+                getOpt4(opt4);
             }
             else if(input == 5){                        //"5-Followers who I don't follow back "
-                opt5(followersSet, followingSet);
+                getOpt5(opt5);
             }
             else if(input == 0){                        //"0-QUIT"
                 System.out.println("Quitting. BYE!");
@@ -186,43 +194,24 @@ public class main {
 
     }
 
-    public static void opt4(Set<String> followingSet, Set<String> followersSet){
-
-        //Copying sets
-        Set<String> set1 = new HashSet<>();
-        Set<String> set2 = new HashSet<>();
-        set1.addAll(followingSet);
-        set2.addAll(followersSet);
-
-        //Extracting followers from following
-        set1.removeAll(set2);
+    public static void getOpt4(Set<String> opt4){
 
         //Printing the result
         System.out.println("Followings who don't follow you back:");
-        for (String user : set1) {
+        for (String user : opt4) {
             System.out.println(user);
         }
 
     }
 
-    public static void opt5(Set<String> followersSet, Set<String> followingSet){
-        //Copying sets
-        Set<String> set1 = new HashSet<>();
-        Set<String> set2 = new HashSet<>();
-        set1.addAll(followersSet);
-        set2.addAll(followingSet);
-
-        //Extracting following from followers
-        set1.removeAll(set2);
+    public static void getOpt5(Set<String> opt5){
 
         //Printing the result
         System.out.println("Followers who you don't follow back: ");
-        for (String user : set1) {
+        for (String user : opt5) {
             System.out.println(user);
         }
 
     }
-
-
 
 }
